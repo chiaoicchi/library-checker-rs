@@ -1,0 +1,9 @@
+[package]
+name = "library_checker"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+
+[dependencies]
+data_strux = { git = "https://github.com/chiaoicchi/data-strux-rs" }
+
