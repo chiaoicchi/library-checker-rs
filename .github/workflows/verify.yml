@@ -1,0 +1,99 @@
+name: Verify by Library Checker
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  RUST_VERSION: "1.89.0"
+
+jobs:
+  verify:
+    name: ${{ matrix.category }} ${{ matrix.problem }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - category: data_structure
+            problem: unionfind
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          source $HOME/.cargo/env
+      - name: Cache cargo dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3
+
+      - name: Clone library-checker-problems
+        run: |
+          git clone https://github.com/yosupo06/library-checker-problems.git
+
+      - name: Verify ${{ matrix.problem }}
+        timeout-minutes: 5
+        run: |
+          echo "PROBLEM=${{ matrix.problem }}"
+
+          echo "Generate test cases"
+          cd library-checker-problems
+          ./generate.py -p ${{ matrix.problem }}
+          cd ..
+
+          echo "Test"
+          IN_DIR=library-checker-problems/${{ matrix.category }}/${{ matrix.problem }}/in
+          OUT_DIR=library-checker-problems/${{ matrix.category }}/${{ matrix.problem }}/out
+          passed=0
+          failed=0
+          for input in "$IN_DIR"/*.in; do
+            [ -e "$input" ] || continue
+
+            basename=$(basename "$input" .in)
+            output="$OUT_DIR/${basename}.out"
+
+            if [ ! -f "$output" ]; then
+              echo "Warning: $output not found, skipping"
+              continue
+            fi
+
+            if cargo run --release --bin ${{ matrix.problem }} < "$input" 2>/dev/null | diff -q - "$output" > /dev/null 2>&1; then
+              echo "PASSED: $basename"
+              passed=$((passed + 1))
+            else
+              echo "FAILED: $basename"
+              failed=$((failed + 1))
+            fi
+          done
+
+          echo ""
+          if [ $passed -eq 0 ] && [ $failed -eq 0 ]; then
+            echo "No test cases found"
+            exit 1
+          elif [ $failed -eq 0 ]; then
+            echo "All $passed tests passed"
+            exit 0
+          else
+            echo "Results: $passed passed, $failed failed"
+            exit 1
+          fi
