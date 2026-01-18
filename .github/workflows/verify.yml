@@ -75,16 +75,16 @@ jobs:
             output="$OUT_DIR/${basename}.out"
 
             if [ ! -f "$output" ]; then
-	            echo "Warning: $output not found, skipping"
-	            continue
+              echo "Warning: $output not found, skipping"
+              continue
             fi
 
             if cargo run --release --bin ${{ matrix.problem }} < "$input" 2>/dev/null | diff -q - "$output" > /dev/null 2>&1; then
-	            echo "PASSED"
-	            passed=$((passed + 1))
+              echo "PASSED: $basename"
+              passed=$((passed + 1))
             else
-	            echo "FAILED"
-	            failed=$((failed + 1))
+              echo "FAILED: $basename"
+              failed=$((failed + 1))
             fi
           done
 
