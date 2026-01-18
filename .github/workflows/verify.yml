@@ -64,7 +64,7 @@ jobs:
           cd ..
 
           echo "Test"
-          IN_DIR=library-checker-problems/${$ matrix.category }}/${{ matrix.problem }}/in
+          IN_DIR=library-checker-problems/${{ matrix.category }}/${{ matrix.problem }}/in
           OUT_DIR=library-checker-problems/${{ matrix.category }}/${{ matrix.problem }}/out
           passed=0
           failed=0
@@ -75,11 +75,11 @@ jobs:
             output="$OUT_DIR/${basename}.out"
 
             if [ ! -f "$output" ]; then
-	            echo "Warning: $output not founc, skipping"
+	            echo "Warning: $output not found, skipping"
 	            continue
             fi
 
-            if cargo run --release --bin ${PROBLEM} < "$input" 2>/dev/null | diff -q - "$output" > /dev/null 2>&1; then
+            if cargo run --release --bin ${{ matrix.problem }} < "$input" 2>/dev/null | diff -q - "$output" > /dev/null 2>&1; then
 	            echo "PASSED"
 	            passed=$((passed + 1))
             else
@@ -97,5 +97,5 @@ jobs:
             exit 0
           else
             echo "Results: $passed passed, $failed failed"
-            exit
+            exit 1
           fi
