@@ -24,6 +24,9 @@ jobs:
           - category: data_structure
             problem: unionfind
 
+          - category: data_structure
+            problem: point_set_point_composite
+
     steps:
       - uses: actions/checkout@v4
 
