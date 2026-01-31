@@ -27,6 +27,9 @@ jobs:
           - category: data_structure
             problem: point_set_range_composite
 
+          - category: data_structure
+            problem: range_affine_range_sum
+
     steps:
       - uses: actions/checkout@v4
 
