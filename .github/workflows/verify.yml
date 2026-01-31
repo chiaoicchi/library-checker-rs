@@ -25,6 +25,9 @@ jobs:
             problem: unionfind
 
           - category: data_structure
+            problem: point_add_range_sum
+
+          - category: data_structure
             problem: point_set_range_composite
 
           - category: data_structure
